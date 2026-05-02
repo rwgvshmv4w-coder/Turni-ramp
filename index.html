@@ -1,0 +1,1701 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Turni RAMP">
+<meta name="theme-color" content="#0a0e1a">
+<link rel="manifest" href="manifest.json">
+<title>Turni RAMP</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="shifts_data.js"></script>
+
+<style>
+:root {
+  --bg: #0a0e1a;
+  --bg2: #111827;
+  --bg3: #1c2535;
+  --surface: #1e2b42;
+  --surface2: #253347;
+  --border: rgba(255,255,255,0.08);
+  --accent: #00d4ff;
+  --accent2: #7c3aed;
+  --accent3: #f59e0b;
+  --green: #10b981;
+  --red: #ef4444;
+  --text: #e8edf5;
+  --text2: #94a3b8;
+  --text3: #64748b;
+  --mono: 'Space Mono', monospace;
+  --sans: 'DM Sans', sans-serif;
+  --radius: 16px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100dvh;
+  overflow-x: hidden;
+  overscroll-behavior: none;
+}
+
+/* ─── LAYOUT ─── */
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+/* ─── HEADER ─── */
+.header {
+  background: linear-gradient(135deg, #0f1c35 0%, #1a2744 100%);
+  padding: calc(var(--safe-top) + 16px) 20px 16px;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  flex-shrink: 0;
+}
+
+.header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo-icon {
+  width: 38px;
+  height: 38px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-family: var(--mono);
+  font-weight: 700;
+  color: white;
+  letter-spacing: -1px;
+}
+
+.logo-text h1 {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.logo-text p {
+  font-size: 11px;
+  color: var(--text3);
+  font-family: var(--mono);
+  letter-spacing: 1px;
+}
+
+.header-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg3);
+  color: var(--text2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-icon:active { transform: scale(0.92); background: var(--surface); }
+.btn-icon.active { background: rgba(0,212,255,0.15); border-color: var(--accent); color: var(--accent); }
+
+/* ─── SEARCH ─── */
+.search-wrap {
+  position: relative;
+}
+
+.search-input {
+  width: 100%;
+  padding: 10px 14px 10px 38px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.search-input:focus { border-color: var(--accent); }
+.search-input::placeholder { color: var(--text3); }
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text3);
+  font-size: 14px;
+  pointer-events: none;
+}
+
+/* ─── TABS ─── */
+.tabs {
+  display: flex;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+  scrollbar-width: none;
+  flex-shrink: 0;
+}
+
+.tabs::-webkit-scrollbar { display: none; }
+
+.tab {
+  flex-shrink: 0;
+  padding: 12px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text3);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  transition: all 0.2s;
+  letter-spacing: 0.3px;
+}
+
+.tab.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+  background: rgba(0,212,255,0.05);
+}
+
+/* ─── MAIN CONTENT ─── */
+.content {
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-bottom: calc(var(--safe-bottom) + 80px);
+}
+
+/* ─── BOTTOM NAV ─── */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 480px;
+  background: rgba(10,14,26,0.95);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid var(--border);
+  display: flex;
+  padding-bottom: var(--safe-bottom);
+  z-index: 100;
+}
+
+.nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 0;
+  cursor: pointer;
+  color: var(--text3);
+  transition: color 0.2s;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.nav-item.active { color: var(--accent); }
+.nav-icon { font-size: 22px; line-height: 1; }
+.nav-item:active { opacity: 0.7; }
+
+/* ─── VIEWS ─── */
+.view { display: none; }
+.view.active { display: block; }
+
+/* ─── SECTION HEADER ─── */
+.section-header {
+  padding: 14px 20px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.section-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: var(--text3);
+  text-transform: uppercase;
+  font-family: var(--mono);
+}
+
+.section-badge {
+  font-size: 10px;
+  font-family: var(--mono);
+  color: var(--accent);
+  background: rgba(0,212,255,0.1);
+  padding: 2px 8px;
+  border-radius: 20px;
+}
+
+/* ─── WORKER CARD ─── */
+.worker-card {
+  margin: 0 16px 8px;
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  transition: all 0.2s;
+}
+
+.worker-card:active { transform: scale(0.98); }
+
+.worker-header {
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.worker-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.worker-info { flex: 1; min-width: 0; }
+
+.worker-name {
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.3px;
+}
+
+.worker-section {
+  font-size: 11px;
+  color: var(--text3);
+  margin-top: 2px;
+  font-family: var(--mono);
+}
+
+.worker-today {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.today-shift {
+  font-family: var(--mono);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.today-label {
+  font-size: 10px;
+  color: var(--text3);
+  margin-top: 2px;
+}
+
+/* ─── SHIFT TIMELINE ─── */
+.shifts-grid {
+  padding: 0 16px 14px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.shifts-grid::-webkit-scrollbar { display: none; }
+
+.shifts-row {
+  display: flex;
+  gap: 4px;
+  min-width: max-content;
+}
+
+.shift-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 32px;
+}
+
+.shift-day-num {
+  font-size: 9px;
+  color: var(--text3);
+  font-family: var(--mono);
+}
+
+.shift-badge {
+  padding: 4px 4px;
+  border-radius: 6px;
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 700;
+  min-width: 32px;
+  text-align: center;
+  letter-spacing: 0.3px;
+}
+
+.shift-today { ring: 2px solid white; outline: 2px solid var(--accent); outline-offset: 1px; }
+
+/* ─── SHIFT COLORS ─── */
+.sc-H { background: rgba(0,212,255,0.15); color: #00d4ff; }
+.sc-R { background: rgba(124,58,237,0.2); color: #a78bfa; }
+.sc-R1 { background: rgba(124,58,237,0.2); color: #a78bfa; }
+.sc-R2 { background: rgba(99,46,211,0.2); color: #8b5cf6; }
+.sc-F { background: rgba(16,185,129,0.15); color: #10b981; }
+.sc-D { background: rgba(245,158,11,0.15); color: #f59e0b; }
+.sc-E { background: rgba(236,72,153,0.15); color: #ec4899; }
+.sc-ASP { background: rgba(239,68,68,0.15); color: #ef4444; }
+.sc-FS { background: rgba(239,68,68,0.2); color: #f87171; }
+.sc-empty { background: transparent; color: transparent; }
+
+/* ─── TODAY VIEW ─── */
+.today-header {
+  padding: 20px;
+  background: linear-gradient(135deg, rgba(0,212,255,0.05), rgba(124,58,237,0.05));
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 4px;
+}
+
+.today-date {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.today-date span {
+  color: var(--accent);
+}
+
+.today-subtitle {
+  color: var(--text3);
+  font-size: 13px;
+  margin-top: 4px;
+  font-family: var(--mono);
+}
+
+.today-shift-list {
+  padding: 0 16px;
+}
+
+.shift-group {
+  margin-bottom: 16px;
+}
+
+.shift-group-title {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--text3);
+  text-transform: uppercase;
+  font-family: var(--mono);
+  padding: 12px 4px 8px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 8px;
+}
+
+.shift-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: var(--surface);
+  border-radius: 12px;
+  margin-bottom: 6px;
+  border: 1px solid var(--border);
+}
+
+.shift-item-name {
+  flex: 1;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.shift-item-section {
+  font-size: 10px;
+  color: var(--text3);
+  font-family: var(--mono);
+  margin-top: 2px;
+}
+
+.shift-item-code {
+  font-family: var(--mono);
+  font-size: 14px;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 8px;
+}
+
+/* ─── CALENDAR VIEW ─── */
+.calendar-wrap {
+  padding: 16px;
+}
+
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-top: 12px;
+}
+
+.cal-day-label {
+  text-align: center;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text3);
+  font-family: var(--mono);
+  padding: 4px 0;
+}
+
+.cal-day {
+  aspect-ratio: 1;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.cal-day:empty { cursor: default; }
+.cal-day.empty { background: transparent; cursor: default; }
+.cal-day.today-cal { border: 2px solid var(--accent); }
+.cal-day.selected { background: var(--accent); color: var(--bg); }
+.cal-day:not(.empty):not(.selected):active { background: var(--surface2); }
+.cal-day:not(.empty):not(.selected) { background: var(--surface); color: var(--text); }
+
+.cal-day-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+/* ─── STATS VIEW ─── */
+.stats-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 16px;
+}
+
+.stat-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 16px;
+  border: 1px solid var(--border);
+}
+
+.stat-value {
+  font-size: 32px;
+  font-weight: 700;
+  font-family: var(--mono);
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: 11px;
+  color: var(--text3);
+  margin-top: 6px;
+  font-weight: 500;
+}
+
+.stat-accent { color: var(--accent); }
+.stat-green { color: var(--green); }
+.stat-purple { color: #a78bfa; }
+.stat-amber { color: var(--accent3); }
+
+/* ─── MODAL ─── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(4px);
+  z-index: 200;
+  display: none;
+  align-items: flex-end;
+}
+
+.modal-overlay.open { display: flex; }
+
+.modal {
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  background: var(--bg2);
+  border-radius: 24px 24px 0 0;
+  border: 1px solid var(--border);
+  padding: 20px 20px calc(var(--safe-bottom) + 20px);
+  animation: slideUp 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  max-height: 90dvh;
+  overflow-y: auto;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.modal-handle {
+  width: 40px;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  margin: 0 auto 20px;
+}
+
+.modal-title {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.modal-subtitle {
+  font-size: 12px;
+  color: var(--text3);
+  font-family: var(--mono);
+  margin-bottom: 20px;
+}
+
+/* ─── EDIT SHIFT ─── */
+.edit-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+}
+
+.edit-day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.edit-day-num {
+  font-size: 9px;
+  color: var(--text3);
+  font-family: var(--mono);
+}
+
+.edit-shift-input {
+  width: 100%;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 9px;
+  text-align: center;
+  padding: 6px 2px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.edit-shift-input:focus { border-color: var(--accent); }
+
+/* ─── BUTTONS ─── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+  width: 100%;
+  margin-top: 12px;
+}
+
+.btn-primary { background: var(--accent); color: var(--bg); }
+.btn-primary:active { opacity: 0.85; transform: scale(0.98); }
+.btn-secondary { background: var(--surface2); color: var(--text); }
+.btn-secondary:active { opacity: 0.85; }
+.btn-danger { background: rgba(239,68,68,0.15); color: var(--red); border: 1px solid rgba(239,68,68,0.2); }
+
+/* ─── NOTIF VIEW ─── */
+.notif-card {
+  margin: 0 16px 10px;
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  padding: 16px;
+}
+
+.notif-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.notif-card-title {
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.toggle-switch {
+  width: 48px;
+  height: 28px;
+  background: var(--bg3);
+  border-radius: 14px;
+  position: relative;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+
+.toggle-switch.on { background: var(--accent); border-color: var(--accent); }
+
+.toggle-knob {
+  width: 22px;
+  height: 22px;
+  background: white;
+  border-radius: 50%;
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  transition: transform 0.2s;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+}
+
+.toggle-switch.on .toggle-knob { transform: translateX(20px); }
+
+.notif-desc {
+  font-size: 12px;
+  color: var(--text3);
+  line-height: 1.5;
+}
+
+.time-select {
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 14px;
+  margin-top: 10px;
+  outline: none;
+}
+
+.time-select:focus { border-color: var(--accent); }
+
+/* ─── LOADER ─── */
+.loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  color: var(--text3);
+  gap: 12px;
+}
+
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ─── EMPTY STATE ─── */
+.empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text3);
+}
+
+.empty-icon { font-size: 40px; margin-bottom: 12px; }
+.empty-title { font-size: 16px; font-weight: 600; color: var(--text2); margin-bottom: 6px; }
+.empty-desc { font-size: 13px; line-height: 1.5; }
+
+/* ─── FILTER CHIPS ─── */
+.chips-wrap {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.chips-wrap::-webkit-scrollbar { display: none; }
+
+.chip {
+  flex-shrink: 0;
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--text3);
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.chip.active {
+  background: rgba(0,212,255,0.15);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* ─── MONTH SELECTOR ─── */
+.month-selector {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px 8px;
+}
+
+.month-title {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.month-nav {
+  display: flex;
+  gap: 8px;
+}
+
+.month-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text2);
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.month-btn:active { background: var(--surface2); }
+
+/* ─── IMPORT BUTTON ─── */
+.import-wrap {
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.import-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1px dashed var(--border);
+  cursor: pointer;
+  transition: all 0.2s;
+  width: 100%;
+  text-align: left;
+}
+
+.import-btn:active { background: var(--surface2); }
+
+.import-icon {
+  width: 40px;
+  height: 40px;
+  background: rgba(0,212,255,0.1);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.import-text strong {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.import-text span {
+  font-size: 11px;
+  color: var(--text3);
+}
+
+/* ─── TOAST ─── */
+.toast {
+  position: fixed;
+  top: calc(var(--safe-top) + 70px);
+  left: 50%;
+  transform: translateX(-50%) translateY(-20px);
+  background: var(--green);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  z-index: 300;
+  opacity: 0;
+  transition: all 0.3s;
+  white-space: nowrap;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-top">
+      <div class="logo">
+        <div class="logo-icon">TR</div>
+        <div class="logo-text">
+          <h1>Turni RAMP</h1>
+          <p>GESTIONE TURNI</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="btn-icon" id="notifBtn" title="Notifiche">🔔</button>
+        <button class="btn-icon" id="searchBtn" title="Cerca">🔍</button>
+      </div>
+    </div>
+    <div class="search-wrap" id="searchWrap" style="display:none">
+      <span class="search-icon">🔍</span>
+      <input class="search-input" id="searchInput" type="search" placeholder="Cerca dipendente..." autocomplete="off">
+    </div>
+  </div>
+
+  <!-- TABS (for sheet selection) -->
+  <div class="tabs" id="tabs"></div>
+
+  <!-- CONTENT -->
+  <div class="content" id="content">
+    <div class="loader"><div class="spinner"></div><span>Caricamento...</span></div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <div class="bottom-nav">
+    <div class="nav-item active" data-view="oggi" onclick="switchView('oggi')">
+      <span class="nav-icon">☀️</span>
+      <span>Oggi</span>
+    </div>
+    <div class="nav-item" data-view="dipendenti" onclick="switchView('dipendenti')">
+      <span class="nav-icon">👥</span>
+      <span>Turni</span>
+    </div>
+    <div class="nav-item" data-view="calendario" onclick="switchView('calendario')">
+      <span class="nav-icon">📅</span>
+      <span>Calendario</span>
+    </div>
+    <div class="nav-item" data-view="stats" onclick="switchView('stats')">
+      <span class="nav-icon">📊</span>
+      <span>Statistiche</span>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <div class="modal-handle"></div>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── STATE ───
+const state = {
+  currentView: 'oggi',
+  currentSheet: null,
+  currentMonth: null, // 0 = agosto, 1 = settembre
+  searchQuery: '',
+  sectionFilter: 'ALL',
+  selectedCalDay: null,
+  notifications: JSON.parse(localStorage.getItem('notif_settings') || '{"enabled":false,"time":"07:00","advance":1}'),
+  edits: JSON.parse(localStorage.getItem('shift_edits') || '{}'),
+};
+
+// Sheet names
+const SHEETS = Object.keys(SHIFTS_DATA);
+
+// Today
+const TODAY = new Date();
+const TODAY_DAY = TODAY.getDate();
+const TODAY_MONTH = TODAY.getMonth(); // 7=Aug, 8=Sep
+const TODAY_YEAR = TODAY.getFullYear();
+
+// Months mapping
+const MONTHS = {
+  'Agosto 25 P': { month: 7, year: 2025, label: 'Agosto 2025', days: 31 },
+  'Settembre 25 P': { month: 8, year: 2025, label: 'Settembre 2025', days: 30 },
+  'Agosto 25 D': { month: 7, year: 2025, label: 'Agosto 2025 (D)', days: 31 },
+  'Settembre 25 D': { month: 8, year: 2025, label: 'Settembre 2025 (D)', days: 30 },
+};
+
+const WEEKDAYS_IT = ['Dom','Lun','Mar','Mer','Gio','Ven','Sab'];
+const MONTHS_IT = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
+
+// ─── INIT ───
+function init() {
+  // Auto-select best sheet
+  if (TODAY_MONTH === 7) {
+    state.currentSheet = SHEETS[0]; // Agosto 25 P
+  } else if (TODAY_MONTH === 8) {
+    state.currentSheet = SHEETS[1]; // Settembre 25 P
+  } else {
+    state.currentSheet = SHEETS[0];
+  }
+
+  buildTabs();
+  switchView('oggi');
+  setupSearch();
+  scheduleNotifications();
+}
+
+// ─── TABS ───
+function buildTabs() {
+  const tabs = document.getElementById('tabs');
+  tabs.innerHTML = SHEETS.map(s => `
+    <div class="tab ${s === state.currentSheet ? 'active' : ''}" onclick="selectSheet('${s}')">${MONTHS[s]?.label || s}</div>
+  `).join('');
+}
+
+function selectSheet(sheet) {
+  state.currentSheet = sheet;
+  buildTabs();
+  renderCurrentView();
+}
+
+// ─── SHIFT UTILS ───
+function getShift(workerName, sheet, day) {
+  const editKey = `${sheet}|${workerName}|${day}`;
+  if (state.edits[editKey] !== undefined) return state.edits[editKey];
+  const workers = SHIFTS_DATA[sheet] || [];
+  const w = workers.find(x => x.name === workerName);
+  return w ? (w.shifts[day] || '') : '';
+}
+
+function setShift(workerName, sheet, day, value) {
+  const editKey = `${sheet}|${workerName}|${day}`;
+  state.edits[editKey] = value;
+  localStorage.setItem('shift_edits', JSON.stringify(state.edits));
+}
+
+function getShiftClass(code) {
+  if (!code) return 'sc-empty';
+  if (code.startsWith('H')) return 'sc-H';
+  if (code === 'R1') return 'sc-R1';
+  if (code === 'R2') return 'sc-R2';
+  if (code === 'R') return 'sc-R';
+  if (code.startsWith('F') && code !== 'FS') return 'sc-F';
+  if (code === 'FS') return 'sc-FS';
+  if (code.startsWith('D')) return 'sc-D';
+  if (code.startsWith('E')) return 'sc-E';
+  if (code === 'ASP') return 'sc-ASP';
+  return '';
+}
+
+function getAvatarColor(name) {
+  const colors = [
+    ['rgba(0,212,255,0.2)','#00d4ff'],
+    ['rgba(124,58,237,0.2)','#a78bfa'],
+    ['rgba(16,185,129,0.2)','#10b981'],
+    ['rgba(245,158,11,0.2)','#f59e0b'],
+    ['rgba(236,72,153,0.2)','#ec4899'],
+  ];
+  const idx = name.charCodeAt(0) % colors.length;
+  return colors[idx];
+}
+
+function getWorkers() {
+  return (SHIFTS_DATA[state.currentSheet] || []);
+}
+
+function getSections() {
+  const secs = [...new Set(getWorkers().map(w => w.section.trim()))];
+  return secs;
+}
+
+function getDays() {
+  return MONTHS[state.currentSheet]?.days || 31;
+}
+
+function getMonthInfo() {
+  return MONTHS[state.currentSheet] || { month: 7, year: 2025, label: 'Agosto 2025', days: 31 };
+}
+
+// ─── VIEW SWITCHER ───
+function switchView(view) {
+  state.currentView = view;
+  document.querySelectorAll('.nav-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.view === view);
+  });
+  renderCurrentView();
+}
+
+function renderCurrentView() {
+  switch (state.currentView) {
+    case 'oggi': renderOggi(); break;
+    case 'dipendenti': renderDipendenti(); break;
+    case 'calendario': renderCalendario(); break;
+    case 'stats': renderStats(); break;
+  }
+}
+
+// ─── OGGI VIEW ───
+function renderOggi() {
+  const info = getMonthInfo();
+  const isToday = info.month === TODAY_MONTH && info.year === TODAY_YEAR;
+  const displayDay = isToday ? TODAY_DAY : 1;
+
+  const workers = getWorkers();
+  const grouped = {};
+
+  workers.forEach(w => {
+    const shift = getShift(w.name, state.currentSheet, displayDay);
+    if (!shift) return;
+    const sec = w.section.trim();
+    if (!grouped[sec]) grouped[sec] = [];
+    grouped[sec].push({ name: w.name, shift });
+  });
+
+  const wd = isToday ? WEEKDAYS_IT[TODAY.getDay()] : '';
+
+  let html = `
+    <div class="today-header">
+      <div class="today-date">${isToday ? `${WEEKDAYS_IT[TODAY.getDay()]}, <span>${TODAY_DAY} ${MONTHS_IT[TODAY_MONTH]}</span>` : `1 ${MONTHS_IT[info.month]}`}</div>
+      <div class="today-subtitle">${info.label.toUpperCase()} · ${Object.values(grouped).flat().length} DIPENDENTI IN TURNO</div>
+    </div>
+    <div class="today-shift-list">
+  `;
+
+  const secOrder = ['GSE','SUPERVISOR','TEAM LEADER','OPR','OUA T.I NO PAT','OUA T.I SI PAT','OUA BHS','OUA LOST','OUA T.D'];
+  const allSecs = Object.keys(grouped);
+  const sorted = [...secOrder.filter(s => allSecs.includes(s)), ...allSecs.filter(s => !secOrder.includes(s))];
+
+  if (sorted.length === 0) {
+    html += `<div class="empty"><div class="empty-icon">🌙</div><div class="empty-title">Nessun turno oggi</div><div class="empty-desc">Non ci sono turni registrati per oggi in questo foglio.</div></div>`;
+  } else {
+    sorted.forEach(sec => {
+      const items = grouped[sec];
+      html += `<div class="shift-group"><div class="shift-group-title">${sec}</div>`;
+      items.forEach(item => {
+        const sc = getShiftClass(item.shift);
+        html += `
+          <div class="shift-item">
+            <div>
+              <div class="shift-item-name">${item.name}</div>
+              <div class="shift-item-section">${sec}</div>
+            </div>
+            <div class="shift-item-code ${sc}">${item.shift || '—'}</div>
+          </div>
+        `;
+      });
+      html += `</div>`;
+    });
+  }
+
+  html += `</div>`;
+  document.getElementById('content').innerHTML = html;
+}
+
+// ─── DIPENDENTI VIEW ───
+function renderDipendenti() {
+  const workers = getWorkers();
+  const sections = getSections();
+  const info = getMonthInfo();
+  const days = getDays();
+  const query = state.searchQuery.toLowerCase();
+
+  let filtered = workers.filter(w => {
+    if (query && !w.name.toLowerCase().includes(query)) return false;
+    if (state.sectionFilter !== 'ALL' && w.section.trim() !== state.sectionFilter) return false;
+    return true;
+  });
+
+  let html = `
+    <div class="import-wrap">
+      <button class="import-btn" onclick="openImport()">
+        <div class="import-icon">📁</div>
+        <div class="import-text">
+          <strong>Importa / Esporta</strong>
+          <span>Gestisci i dati dei turni</span>
+        </div>
+      </button>
+    </div>
+    <div class="chips-wrap">
+      <div class="chip ${state.sectionFilter==='ALL'?'active':''}" onclick="filterSection('ALL')">Tutti</div>
+      ${sections.map(s => `<div class="chip ${state.sectionFilter===s?'active':''}" onclick="filterSection('${s}')">${s}</div>`).join('')}
+    </div>
+    <div class="section-header">
+      <span class="section-title">Dipendenti</span>
+      <span class="section-badge">${filtered.length} / ${workers.length}</span>
+    </div>
+  `;
+
+  if (filtered.length === 0) {
+    html += `<div class="empty"><div class="empty-icon">🔍</div><div class="empty-title">Nessun risultato</div><div class="empty-desc">Prova a cambiare i filtri di ricerca.</div></div>`;
+  } else {
+    filtered.forEach(w => {
+      const [bgColor, textColor] = getAvatarColor(w.name);
+      const todayShift = info.month === TODAY_MONTH ? getShift(w.name, state.currentSheet, TODAY_DAY) : '';
+      const sc = getShiftClass(todayShift);
+
+      // Build mini shift cells (31 days max)
+      let cells = '';
+      for (let d = 1; d <= days; d++) {
+        const shift = getShift(w.name, state.currentSheet, d);
+        const sc2 = getShiftClass(shift);
+        const isT = info.month === TODAY_MONTH && d === TODAY_DAY;
+        cells += `<div class="shift-cell">
+          <span class="shift-day-num">${d}</span>
+          <span class="shift-badge ${sc2} ${isT?'shift-today':''}">${shift || '·'}</span>
+        </div>`;
+      }
+
+      html += `
+        <div class="worker-card">
+          <div class="worker-header" onclick="openWorkerModal('${w.name.replace(/'/g,"\\'")}')">
+            <div class="worker-avatar" style="background:${bgColor};color:${textColor}">${w.name[0]}</div>
+            <div class="worker-info">
+              <div class="worker-name">${w.name}</div>
+              <div class="worker-section">${w.section.trim()}</div>
+            </div>
+            <div class="worker-today">
+              <div class="today-shift ${sc}">${todayShift || '—'}</div>
+              <div class="today-label">OGGI</div>
+            </div>
+          </div>
+          <div class="shifts-grid">
+            <div class="shifts-row">${cells}</div>
+          </div>
+        </div>
+      `;
+    });
+  }
+
+  document.getElementById('content').innerHTML = html;
+}
+
+function filterSection(sec) {
+  state.sectionFilter = sec;
+  renderDipendenti();
+}
+
+// ─── CALENDARIO VIEW ───
+function renderCalendario() {
+  const info = getMonthInfo();
+  const days = getDays();
+
+  // First day of month
+  const firstDate = new Date(info.year, info.month, 1);
+  const firstDow = firstDate.getDay(); // 0=Sun
+
+  const selectedDay = state.selectedCalDay || (info.month === TODAY_MONTH && info.year === TODAY_YEAR ? TODAY_DAY : 1);
+
+  let calHtml = `
+    <div class="calendar-wrap">
+      <div class="month-selector">
+        <div class="month-title">${MONTHS_IT[info.month]} ${info.year}</div>
+        <div class="month-nav">
+          <button class="month-btn" onclick="prevSheet()">◀</button>
+          <button class="month-btn" onclick="nextSheet()">▶</button>
+        </div>
+      </div>
+      <div class="cal-grid">
+        <div class="cal-day-label">Dom</div>
+        <div class="cal-day-label">Lun</div>
+        <div class="cal-day-label">Mar</div>
+        <div class="cal-day-label">Mer</div>
+        <div class="cal-day-label">Gio</div>
+        <div class="cal-day-label">Ven</div>
+        <div class="cal-day-label">Sab</div>
+  `;
+
+  // Empty cells
+  for (let i = 0; i < firstDow; i++) {
+    calHtml += `<div class="cal-day empty"></div>`;
+  }
+
+  for (let d = 1; d <= days; d++) {
+    const isToday = info.month === TODAY_MONTH && info.year === TODAY_YEAR && d === TODAY_DAY;
+    const isSelected = d === selectedDay;
+    calHtml += `<div class="cal-day ${isToday?'today-cal':''} ${isSelected?'selected':''}" onclick="selectCalDay(${d})">
+      ${d}
+    </div>`;
+  }
+
+  calHtml += `</div></div>`;
+
+  // Show workers for selected day
+  const workers = getWorkers();
+  const grouped = {};
+  workers.forEach(w => {
+    const shift = getShift(w.name, state.currentSheet, selectedDay);
+    if (!shift) return;
+    const sec = w.section.trim();
+    if (!grouped[sec]) grouped[sec] = [];
+    grouped[sec].push({ name: w.name, shift });
+  });
+
+  calHtml += `
+    <div class="section-header">
+      <span class="section-title">${selectedDay} ${MONTHS_IT[info.month]}</span>
+      <span class="section-badge">${Object.values(grouped).flat().length} turni</span>
+    </div>
+    <div class="today-shift-list" style="padding:0 16px">
+  `;
+
+  const secOrder = ['GSE','SUPERVISOR','TEAM LEADER','OPR','OUA T.I NO PAT','OUA T.I SI PAT','OUA BHS','OUA LOST','OUA T.D'];
+  const sorted = [...secOrder.filter(s => Object.keys(grouped).includes(s)), ...Object.keys(grouped).filter(s => !secOrder.includes(s))];
+
+  if (sorted.length === 0) {
+    calHtml += `<div class="empty"><div class="empty-icon">📋</div><div class="empty-title">Nessun turno</div><div class="empty-desc">Nessun turno registrato per il giorno ${selectedDay}.</div></div>`;
+  } else {
+    sorted.forEach(sec => {
+      const items = grouped[sec];
+      calHtml += `<div class="shift-group"><div class="shift-group-title">${sec}</div>`;
+      items.forEach(item => {
+        const sc = getShiftClass(item.shift);
+        calHtml += `
+          <div class="shift-item">
+            <div>
+              <div class="shift-item-name">${item.name}</div>
+              <div class="shift-item-section">${sec}</div>
+            </div>
+            <div class="shift-item-code ${sc}">${item.shift}</div>
+          </div>
+        `;
+      });
+      calHtml += `</div>`;
+    });
+  }
+
+  calHtml += `</div>`;
+  document.getElementById('content').innerHTML = calHtml;
+}
+
+function selectCalDay(day) {
+  state.selectedCalDay = day;
+  renderCalendario();
+}
+
+function prevSheet() {
+  const idx = SHEETS.indexOf(state.currentSheet);
+  if (idx > 0) { state.currentSheet = SHEETS[idx-1]; buildTabs(); renderCurrentView(); }
+}
+
+function nextSheet() {
+  const idx = SHEETS.indexOf(state.currentSheet);
+  if (idx < SHEETS.length-1) { state.currentSheet = SHEETS[idx+1]; buildTabs(); renderCurrentView(); }
+}
+
+// ─── STATS VIEW ───
+function renderStats() {
+  const workers = getWorkers();
+  const info = getMonthInfo();
+  const days = getDays();
+
+  let totalShifts = 0;
+  let riposi = 0;
+  let festivi = 0;
+  let shiftCounts = {};
+
+  workers.forEach(w => {
+    for (let d = 1; d <= days; d++) {
+      const shift = getShift(w.name, state.currentSheet, d);
+      if (!shift) continue;
+      totalShifts++;
+      if (shift === 'R1' || shift === 'R2' || shift === 'R') riposi++;
+      if (shift === 'FS') festivi++;
+      shiftCounts[shift] = (shiftCounts[shift] || 0) + 1;
+    }
+  });
+
+  const topShifts = Object.entries(shiftCounts).sort((a,b) => b[1]-a[1]).slice(0, 5);
+
+  // Per-section stats
+  const sections = getSections();
+  let secStats = sections.map(sec => {
+    const sw = workers.filter(w => w.section.trim() === sec);
+    return { sec, count: sw.length };
+  }).sort((a,b) => b.count - a.count);
+
+  let html = `
+    <div class="section-header">
+      <span class="section-title">Panoramica</span>
+      <span class="section-badge">${info.label}</span>
+    </div>
+    <div class="stats-cards">
+      <div class="stat-card">
+        <div class="stat-value stat-accent">${workers.length}</div>
+        <div class="stat-label">Dipendenti totali</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value stat-green">${totalShifts - riposi}</div>
+        <div class="stat-label">Turni di lavoro</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value stat-purple">${riposi}</div>
+        <div class="stat-label">Giorni di riposo</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value stat-amber">${festivi}</div>
+        <div class="stat-label">Festivi (FS)</div>
+      </div>
+    </div>
+
+    <div class="section-header">
+      <span class="section-title">Codici più usati</span>
+    </div>
+    <div style="padding:0 16px 16px">
+      ${topShifts.map(([code, count]) => {
+        const sc = getShiftClass(code);
+        const pct = Math.round((count / totalShifts) * 100);
+        return `
+          <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--surface);border-radius:12px;margin-bottom:6px;border:1px solid var(--border)">
+            <span class="shift-badge ${sc}" style="font-size:13px;min-width:44px">${code}</span>
+            <div style="flex:1">
+              <div style="height:6px;background:var(--bg3);border-radius:3px;overflow:hidden">
+                <div style="height:100%;width:${pct}%;background:var(--accent);border-radius:3px;transition:width 0.5s"></div>
+              </div>
+            </div>
+            <span style="font-family:var(--mono);font-size:12px;color:var(--text3)">${count} <span style="opacity:0.5">(${pct}%)</span></span>
+          </div>
+        `;
+      }).join('')}
+    </div>
+
+    <div class="section-header">
+      <span class="section-title">Per sezione</span>
+    </div>
+    <div style="padding:0 16px 80px">
+      ${secStats.map(({sec, count}) => `
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--surface);border-radius:12px;margin-bottom:6px;border:1px solid var(--border)">
+          <span style="font-weight:600;font-size:13px">${sec}</span>
+          <span style="font-family:var(--mono);color:var(--accent);font-size:13px">${count}</span>
+        </div>
+      `).join('')}
+    </div>
+  `;
+
+  document.getElementById('content').innerHTML = html;
+}
+
+// ─── WORKER MODAL ───
+function openWorkerModal(name) {
+  const info = getMonthInfo();
+  const days = getDays();
+  const worker = getWorkers().find(w => w.name === name);
+  if (!worker) return;
+
+  const [bgColor, textColor] = getAvatarColor(name);
+
+  let dayInputs = '';
+  for (let d = 1; d <= days; d++) {
+    const shift = getShift(name, state.currentSheet, d);
+    dayInputs += `
+      <div class="edit-day">
+        <span class="edit-day-num">${d}</span>
+        <input class="edit-shift-input" id="ed_${d}" value="${shift}" maxlength="4" 
+          onchange="updateShiftLive('${name.replace(/'/g,"\\'")}', ${d}, this.value)">
+      </div>
+    `;
+  }
+
+  document.getElementById('modalContent').innerHTML = `
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+      <div class="worker-avatar" style="background:${bgColor};color:${textColor};width:52px;height:52px;font-size:22px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-weight:700">${name[0]}</div>
+      <div>
+        <div class="modal-title">${name}</div>
+        <div class="modal-subtitle">${worker.section.trim()} · ${info.label}</div>
+      </div>
+    </div>
+    <div class="section-title" style="padding:0;margin-bottom:12px">TURNI ${info.label.toUpperCase()}</div>
+    <div style="overflow-x:auto;padding-bottom:8px">
+      <div class="edit-grid" style="min-width:${days*38}px">${dayInputs}</div>
+    </div>
+    <button class="btn btn-primary" onclick="saveEdits('${name.replace(/'/g,"\\'")}')">✅ Salva modifiche</button>
+    <button class="btn btn-secondary" onclick="closeModal()">Chiudi</button>
+  `;
+
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function updateShiftLive(name, day, value) {
+  setShift(name, state.currentSheet, day, value.toUpperCase().trim());
+}
+
+function saveEdits(name) {
+  // Already saved live, just confirm
+  closeModal();
+  showToast('✅ Modifiche salvate!');
+  renderCurrentView();
+}
+
+// ─── IMPORT MODAL ───
+function openImport() {
+  document.getElementById('modalContent').innerHTML = `
+    <div class="modal-title">📁 Importa / Esporta</div>
+    <div class="modal-subtitle">Gestisci i dati dei turni</div>
+
+    <div class="notif-card" style="margin:0 0 12px">
+      <div class="notif-card-header">
+        <div>
+          <div class="notif-card-title">📤 Esporta modifiche</div>
+        </div>
+      </div>
+      <div class="notif-desc">Scarica le modifiche apportate ai turni come file JSON.</div>
+      <button class="btn btn-secondary" onclick="exportEdits()" style="margin-top:12px">📥 Scarica JSON modifiche</button>
+    </div>
+
+    <div class="notif-card" style="margin:0 0 12px">
+      <div class="notif-card-header">
+        <div>
+          <div class="notif-card-title">🗑️ Reset modifiche</div>
+        </div>
+      </div>
+      <div class="notif-desc">Rimuovi tutte le modifiche manuali e torna ai dati originali del file Excel.</div>
+      <button class="btn btn-danger" onclick="resetEdits()" style="margin-top:12px">🔄 Ripristina dati originali</button>
+    </div>
+
+    <button class="btn btn-secondary" onclick="closeModal()">Chiudi</button>
+  `;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function exportEdits() {
+  const data = JSON.stringify(state.edits, null, 2);
+  const blob = new Blob([data], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'turni_modifiche.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('📥 File scaricato!');
+}
+
+function resetEdits() {
+  if (!confirm('Sei sicuro? Tutte le modifiche manuali verranno perse.')) return;
+  state.edits = {};
+  localStorage.removeItem('shift_edits');
+  closeModal();
+  showToast('🔄 Dati ripristinati');
+  renderCurrentView();
+}
+
+// ─── NOTIFICATIONS ───
+function openNotifications() {
+  const n = state.notifications;
+  document.getElementById('modalContent').innerHTML = `
+    <div class="modal-title">🔔 Notifiche Turni</div>
+    <div class="modal-subtitle">IMPOSTAZIONI PROMEMORIA</div>
+
+    <div class="notif-card">
+      <div class="notif-card-header">
+        <div class="notif-card-title">Promemoria turno</div>
+        <div class="toggle-switch ${n.enabled?'on':''}" id="notifToggle" onclick="toggleNotif()">
+          <div class="toggle-knob"></div>
+        </div>
+      </div>
+      <div class="notif-desc">Ricevi una notifica prima dell'inizio del tuo turno ogni giorno.</div>
+    </div>
+
+    <div class="notif-card" style="margin-top:10px">
+      <div class="notif-card-title" style="margin-bottom:8px">Orario notifica</div>
+      <div class="notif-desc">A che ora vuoi ricevere il promemoria?</div>
+      <input type="time" class="time-select" id="notifTime" value="${n.time}" onchange="updateNotifTime(this.value)">
+    </div>
+
+    <div class="notif-card" style="margin-top:10px">
+      <div class="notif-card-title" style="margin-bottom:8px">Anticipo</div>
+      <div class="notif-desc">Quanti giorni prima del turno vuoi essere avvisato?</div>
+      <select class="time-select" id="notifAdvance" onchange="updateNotifAdvance(this.value)">
+        <option value="0" ${n.advance==0?'selected':''}>Stesso giorno</option>
+        <option value="1" ${n.advance==1?'selected':''}>1 giorno prima</option>
+        <option value="2" ${n.advance==2?'selected':''}>2 giorni prima</option>
+      </select>
+    </div>
+
+    <button class="btn btn-primary" onclick="requestNotifPermission()">🔔 Attiva notifiche</button>
+    <button class="btn btn-secondary" onclick="closeModal()">Chiudi</button>
+  `;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function toggleNotif() {
+  state.notifications.enabled = !state.notifications.enabled;
+  saveNotifSettings();
+  const tog = document.getElementById('notifToggle');
+  if (tog) tog.classList.toggle('on', state.notifications.enabled);
+}
+
+function updateNotifTime(val) {
+  state.notifications.time = val;
+  saveNotifSettings();
+}
+
+function updateNotifAdvance(val) {
+  state.notifications.advance = parseInt(val);
+  saveNotifSettings();
+}
+
+function saveNotifSettings() {
+  localStorage.setItem('notif_settings', JSON.stringify(state.notifications));
+}
+
+async function requestNotifPermission() {
+  if (!('Notification' in window)) {
+    showToast('❌ Notifiche non supportate');
+    return;
+  }
+  const perm = await Notification.requestPermission();
+  if (perm === 'granted') {
+    state.notifications.enabled = true;
+    saveNotifSettings();
+    scheduleNotifications();
+    showToast('🔔 Notifiche attivate!');
+    closeModal();
+  } else {
+    showToast('❌ Permesso negato');
+  }
+}
+
+function scheduleNotifications() {
+  if (!state.notifications.enabled || Notification?.permission !== 'granted') return;
+  // Check if we need to send a notification today
+  const now = new Date();
+  const [h, m] = state.notifications.time.split(':').map(Number);
+  const notifTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m, 0);
+  const targetDate = new Date(now);
+  targetDate.setDate(now.getDate() + state.notifications.advance);
+
+  const delay = notifTime - now;
+  if (delay > 0 && delay < 86400000) {
+    setTimeout(() => {
+      const day = targetDate.getDate();
+      const month = targetDate.getMonth();
+      // Find shift for today
+      const sheet = month === 7 ? SHEETS[0] : SHEETS[1];
+      const workers = SHIFTS_DATA[sheet] || [];
+      workers.forEach(w => {
+        const shift = getShift(w.name, sheet, day);
+        if (shift && shift !== 'R1' && shift !== 'R2') {
+          new Notification('Turni RAMP', {
+            body: `${w.name}: turno ${shift} il ${day} ${MONTHS_IT[month]}`,
+            icon: '⏱'
+          });
+        }
+      });
+    }, delay);
+  }
+}
+
+// ─── SEARCH ───
+function setupSearch() {
+  const btn = document.getElementById('searchBtn');
+  const wrap = document.getElementById('searchWrap');
+  const input = document.getElementById('searchInput');
+
+  btn.onclick = () => {
+    const visible = wrap.style.display !== 'none';
+    wrap.style.display = visible ? 'none' : 'block';
+    btn.classList.toggle('active', !visible);
+    if (!visible) { input.focus(); }
+    else { state.searchQuery = ''; input.value = ''; renderCurrentView(); }
+  };
+
+  input.oninput = e => {
+    state.searchQuery = e.target.value;
+    if (state.currentView !== 'dipendenti') switchView('dipendenti');
+    else renderDipendenti();
+  };
+}
+
+// ─── MODAL ───
+function closeModal(e) {
+  if (e && e.target !== document.getElementById('modalOverlay')) return;
+  document.getElementById('modalOverlay').classList.remove('open');
+}
+
+// ─── TOAST ───
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ─── EVENT LISTENERS ───
+document.getElementById('notifBtn').onclick = openNotifications;
+
+// ─── PWA ───
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  });
+}
+
+// ─── START ───
+window.addEventListener('load', init);
+</script>
+</body>
+</html>
